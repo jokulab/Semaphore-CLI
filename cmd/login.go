@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-	//"net/http"
-	//"os"
+	"fmt"	
+	"bytes"
+	"encoding/json"
+	"net/http"
 
 	"github.com/spf13/cobra"
 )
@@ -30,5 +31,32 @@ var loginCmd = &cobra.Command{
 
 
 func login(cmd *cobra.Command, args []string)  {
-	fmt.Println("Run login")
+	fmt.Println("Try login...")
+
+	url := "http://localhost:3000/api/auth/login"
+	data := map[string]string{
+		"auth":     "admin",
+		"password": "admin",
+	}
+	payload, _ := json.Marshal(data)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error making request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("Response Status:", resp.Status)
+
 }
